@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "Formula/**"
+  workflow_dispatch:
 
 jobs:
   detect:
