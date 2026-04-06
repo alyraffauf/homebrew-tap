@@ -1,0 +1,54 @@
+name: Update dewy formula
+
+on:
+  repository_dispatch:
+    types: [dewy-release]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to update to (leave empty for latest)"
+        required: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Generate token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Determine version
+        id: version
+        run: |
+          VERSION="${{ github.event.client_payload.version || github.event.inputs.version || '' }}"
+          if [ -z "$VERSION" ]; then
+            VERSION=$(curl -s https://api.github.com/repos/alyraffauf/dewy/tags | jq -r '.[0].name' | sed 's/^v//')
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Update formula
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          URL="https://github.com/alyraffauf/dewy/archive/refs/tags/v${VERSION}.tar.gz"
+          SHA256=$(curl -sL "$URL" | sha256sum | awk '{print $1}')
+
+          sed -i "s|url \".*\"|url \"$URL\"|" Formula/dewy.rb
+          sed -i "s|sha256 \".*\"|sha256 \"$SHA256\"|" Formula/dewy.rb
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          commit-message: "Update dewy to ${{ steps.version.outputs.version }}"
+          title: "Update dewy formula"
+          body: "Automated formula update triggered by new release."
+          branch: update-dewy
+          delete-branch: true
