@@ -3,8 +3,8 @@ class Atbbs < Formula
 
   desc "AT Protocol bulletin board system"
   homepage "https://github.com/alyraffauf/atbbs"
-  url "https://files.pythonhosted.org/packages/99/e5/06c53e0348a99e795ad06d8ae19975a334291fe182743f556140993ee88b/atbbs-0.5.0.tar.gz"
-  sha256 "9643f958bcc3b0bad6f365f80d041d431b81688916ae787de8a3893cca6edc48"
+  url "https://files.pythonhosted.org/packages/36/4e/e33f4f3243c20a4bf53adf49e991e4069712300f5ebca5583a4f2a9a447f/atbbs-0.5.1.tar.gz"
+  sha256 "614ec9e0c3b186cf4cfc11925b637ef95f4e3b4085f69847c2469d4c6933ff40"
   license "AGPL-3.0-or-later"
 
   depends_on "python@3.14"
