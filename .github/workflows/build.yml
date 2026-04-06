@@ -32,9 +32,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Homebrew dependencies
-        run: brew install python@3.14
-
       - name: Install ${{ matrix.formula }}
         run: |
           brew tap alyraffauf/tap "$PWD"
@@ -56,11 +53,7 @@ jobs:
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.profile
-
-      - name: Install Python
-        run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          brew install python@3.14
 
       - uses: actions/checkout@v4
 
