@@ -3,9 +3,9 @@
 
 import json
 import subprocess
+import time
 import urllib.request
 import sys
-import textwrap
 
 
 def get_pypi_info(package: str, version: str | None = None):
@@ -22,18 +22,28 @@ def get_sdist(pypi_data: dict) -> tuple[str, str]:
 
 
 def resolve_deps(package: str, version: str, python_version: str) -> list[tuple[str, str]]:
-    result = subprocess.run(
-        [
-            "uv", "pip", "compile",
-            "--python-version", python_version,
-            "--no-header",
-            "-",
-        ],
-        input=f"{package}=={version}",
-        capture_output=True,
-        text=True,
-        check=True,
-    )
+    for attempt in range(5):
+        result = subprocess.run(
+            [
+                "uv", "pip", "compile",
+                "--python-version", python_version,
+                "--no-header",
+                "--refresh-package", package,
+                "-",
+            ],
+            input=f"{package}=={version}",
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode == 0:
+            break
+        if attempt < 4:
+            wait = 30 * (attempt + 1)
+            print(f"  Resolve failed, retrying in {wait}s (PyPI propagation delay)...")
+            time.sleep(wait)
+        else:
+            print(result.stderr, file=sys.stderr)
+            sys.exit(1)
 
     deps = []
     for line in result.stdout.strip().splitlines():
