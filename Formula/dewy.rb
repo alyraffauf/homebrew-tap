@@ -8,6 +8,8 @@ class Dewy < Formula
   depends_on "node"
 
   def install
+    system "npm", "ci"
+    system "npm", "run", "build"
     system "npm", "install", *std_npm_args
     bin.install_symlink libexec/"bin/dewy"
   end
