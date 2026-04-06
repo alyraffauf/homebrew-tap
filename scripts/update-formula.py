@@ -45,6 +45,9 @@ def resolve_deps(package: str, version: str, python_version: str) -> list[tuple[
         ver = ver.strip()
         if name.lower() == package.lower():
             continue
+        # Provided by Homebrew's cryptography formula
+        if name.lower() in ("cryptography", "cffi", "pycparser"):
+            continue
         deps.append((name, ver))
     return deps
 
@@ -71,6 +74,7 @@ def generate_formula(version: str, url: str, sha256: str, resources: list[dict])
         f'  sha256 "{sha256}"\n'
         f'  license "AGPL-3.0-or-later"\n'
         f'\n'
+        f'  depends_on "cryptography"\n'
         f'  depends_on "python@3.14"\n'
         f'\n'
         f'{resources_str}\n'
