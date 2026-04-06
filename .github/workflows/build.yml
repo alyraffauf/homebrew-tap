@@ -5,6 +5,11 @@ on:
     paths:
       - "Formula/**"
   workflow_dispatch:
+    inputs:
+      formula:
+        description: "Formula name to build (e.g., atbbs)"
+        required: false
+        type: string
 
 jobs:
   detect:
@@ -19,8 +24,13 @@ jobs:
       - name: Detect changed formulae
         id: changed
         run: |
-          CHANGED=$(git diff --name-only HEAD~1 -- Formula/ | xargs -I{} basename {} .rb | jq -R -s -c 'split("\n") | map(select(length > 0))')
-          echo "formulae=$CHANGED" >> "$GITHUB_OUTPUT"
+          if [ -n "${{ github.event.inputs.formula }}" ]; then
+            FORMULA="${{ github.event.inputs.formula }}"
+            echo "formulae=[\"$FORMULA\"]" >> "$GITHUB_OUTPUT"
+          else
+            CHANGED=$(git diff --name-only HEAD~1 -- Formula/ | xargs -I{} basename {} .rb | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            echo "formulae=$CHANGED" >> "$GITHUB_OUTPUT"
+          fi
 
   test-macos:
     needs: detect
