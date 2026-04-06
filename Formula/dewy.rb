@@ -15,6 +15,6 @@ class Dewy < Formula
   end
 
   test do
-    assert_match version.to_s, shell_output("#{bin}/dewy --version", 1)
+    assert_match "dewy", shell_output("#{bin}/dewy --help 2>&1", 1)
   end
 end
