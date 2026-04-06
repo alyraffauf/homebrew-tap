@@ -105,7 +105,7 @@ class Atbbs < Formula
   end
 
   resource "hypercorn" do
-    url "https://files.pythonhosted.org/packages/44/01/39f41a014b83dd5c795217362f2ca9071cf243e6a75bdccd6cd5b944658cc/hypercorn-0.18.0.tar.gz"
+    url "https://files.pythonhosted.org/packages/44/01/39f41a014b83dd5c795217362f2ca9071cf243e6a75bdcd6cd5b944658cc/hypercorn-0.18.0.tar.gz"
     sha256 "d63267548939c46b0247dc8e5b45a9947590e35e64ee73a23c074aa3cf88e9da"
   end
 
