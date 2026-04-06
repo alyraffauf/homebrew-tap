@@ -47,22 +47,30 @@ jobs:
     needs: detect
     if: needs.detect.outputs.formulae != '[]'
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/homebrew/brew:latest
     strategy:
       fail-fast: false
       matrix:
         formula: ${{ fromJson(needs.detect.outputs.formulae) }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Install Homebrew
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.profile
 
       - name: Install Python
-        run: brew install python@3.14
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          brew install python@3.14
+
+      - uses: actions/checkout@v4
 
       - name: Install ${{ matrix.formula }}
         run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           brew tap alyraffauf/tap "$PWD"
           brew install --build-from-source ${{ matrix.formula }}
 
       - name: Test ${{ matrix.formula }}
-        run: brew test ${{ matrix.formula }}
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          brew test ${{ matrix.formula }}
