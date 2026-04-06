@@ -21,7 +21,7 @@ jobs:
           CHANGED=$(git diff --name-only HEAD~1 -- Formula/ | xargs -I{} basename {} .rb | jq -R -s -c 'split("\n") | map(select(length > 0))')
           echo "formulae=$CHANGED" >> "$GITHUB_OUTPUT"
 
-  test:
+  test-macos:
     needs: detect
     if: needs.detect.outputs.formulae != '[]'
     runs-on: macos-latest
@@ -31,6 +31,33 @@ jobs:
         formula: ${{ fromJson(needs.detect.outputs.formulae) }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install Homebrew dependencies
+        run: brew install python@3.14
+
+      - name: Install ${{ matrix.formula }}
+        run: |
+          brew tap alyraffauf/tap "$PWD"
+          brew install --build-from-source ${{ matrix.formula }}
+
+      - name: Test ${{ matrix.formula }}
+        run: brew test ${{ matrix.formula }}
+
+  test-linux:
+    needs: detect
+    if: needs.detect.outputs.formulae != '[]'
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/homebrew/brew:latest
+    strategy:
+      fail-fast: false
+      matrix:
+        formula: ${{ fromJson(needs.detect.outputs.formulae) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python
+        run: brew install python@3.14
 
       - name: Install ${{ matrix.formula }}
         run: |
