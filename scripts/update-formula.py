@@ -21,6 +21,14 @@ def get_sdist(pypi_data: dict) -> tuple[str, str]:
     raise RuntimeError(f"No sdist found for {pypi_data['info']['name']}")
 
 
+def has_c_extension(pypi_data: dict) -> bool:
+    """A package has C extensions if it publishes platform-specific wheels."""
+    for u in pypi_data["urls"]:
+        if u["packagetype"] == "bdist_wheel" and not u["filename"].endswith("-none-any.whl"):
+            return True
+    return False
+
+
 def resolve_deps(package: str, version: str, python_version: str) -> list[tuple[str, str]]:
     for attempt in range(5):
         result = subprocess.run(
@@ -62,7 +70,8 @@ def resolve_deps(package: str, version: str, python_version: str) -> list[tuple[
     return deps
 
 
-def generate_formula(version: str, url: str, sha256: str, resources: list[dict]) -> str:
+def generate_formula(version: str, url: str, sha256: str,
+                     resources: list[dict], wheel_deps: list[dict]) -> str:
     resource_blocks = []
     for r in resources:
         resource_blocks.append(
@@ -73,6 +82,29 @@ def generate_formula(version: str, url: str, sha256: str, resources: list[dict])
         )
 
     resources_str = "\n\n".join(resource_blocks)
+
+    if wheel_deps:
+        wheel_args = ", ".join(f'"{d["name"]}=={d["version"]}"' for d in wheel_deps)
+        install_block = (
+            f'  def install\n'
+            f'    python = "python3.14"\n'
+            f'    venv = virtualenv_create(libexec, python)\n'
+            f'\n'
+            f'    # Install C-extension packages from pre-built wheels.\n'
+            f'    system python, "-m", "pip", "--python=#{{libexec}}/bin/python",\n'
+            f'           "install", "--no-deps", "--ignore-installed",\n'
+            f'           {wheel_args}\n'
+            f'\n'
+            f'    venv.pip_install resources\n'
+            f'    venv.pip_install_and_link buildpath\n'
+            f'  end'
+        )
+    else:
+        install_block = (
+            f'  def install\n'
+            f'    virtualenv_install_with_resources\n'
+            f'  end'
+        )
 
     return (
         f'class Atbbs < Formula\n'
@@ -89,9 +121,7 @@ def generate_formula(version: str, url: str, sha256: str, resources: list[dict])
         f'\n'
         f'{resources_str}\n'
         f'\n'
-        f'  def install\n'
-        f'    virtualenv_install_with_resources\n'
-        f'  end\n'
+        f'{install_block}\n'
         f'\n'
         f'  test do\n'
         f'    assert_match version.to_s, shell_output("#{{bin}}/atbbs --version")\n'
@@ -114,16 +144,21 @@ def main():
     deps = resolve_deps("atbbs", version, "3.14")
     print(f"  Found {len(deps)} dependencies")
 
-    print("Fetching dependency hashes...")
+    print("Fetching dependency info...")
     resources = []
+    wheel_deps = []
     for name, ver in deps:
         dep_pypi = get_pypi_info(name, ver)
-        dep_url, dep_sha256 = get_sdist(dep_pypi)
-        resources.append({"name": name, "url": dep_url, "sha256": dep_sha256})
-        print(f"  {name}=={ver}")
+        if has_c_extension(dep_pypi):
+            wheel_deps.append({"name": name, "version": ver})
+            print(f"  {name}=={ver} (wheel)")
+        else:
+            dep_url, dep_sha256 = get_sdist(dep_pypi)
+            resources.append({"name": name, "url": dep_url, "sha256": dep_sha256})
+            print(f"  {name}=={ver}")
 
     print("Generating formula...")
-    formula = generate_formula(version, url, sha256, resources)
+    formula = generate_formula(version, url, sha256, resources, wheel_deps)
 
     with open("Formula/atbbs.rb", "w") as f:
         f.write(formula)
