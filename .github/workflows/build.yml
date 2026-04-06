@@ -4,9 +4,6 @@ on:
   push:
     paths:
       - "Formula/**"
-  pull_request:
-    paths:
-      - "Formula/**"
 
 jobs:
   detect:
