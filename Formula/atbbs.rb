@@ -3,8 +3,8 @@ class Atbbs < Formula
 
   desc "AT Protocol bulletin board system"
   homepage "https://github.com/alyraffauf/atbbs"
-  url "https://files.pythonhosted.org/packages/d0/fd/4326790a335e34e5f9eeb90df2cc366ce3436de53797cecc50b1284085b3/atbbs-0.6.0.tar.gz"
-  sha256 "93abd9c1e3de9d87255d8e28c9f3fbeb7f6473c9cbabe3b9cdada0417f3afb50"
+  url "https://files.pythonhosted.org/packages/0e/7a/9a2849a4a674838d9d181a838f748d7a3cbd52e91996709695c745a6bd1b/atbbs-0.7.0.tar.gz"
+  sha256 "33ae0c0cc9435c40a7816b56048456f7ad019835fd10c97539b9a28330ebde06"
   license "AGPL-3.0-or-later"
 
   depends_on "python@3.14"
@@ -150,8 +150,8 @@ class Atbbs < Formula
   end
 
   resource "platformdirs" do
-    url "https://files.pythonhosted.org/packages/19/56/8d4c30c8a1d07013911a8fdbd8f89440ef9f08d07a1b50ab8ca8be5a20f9/platformdirs-4.9.4.tar.gz"
-    sha256 "1ec356301b7dc906d83f371c8f487070e99d3ccf9e501686456394622a01a934"
+    url "https://files.pythonhosted.org/packages/9f/4a/0883b8e3802965322523f0b200ecf33d31f10991d0401162f4b23c698b42/platformdirs-4.9.6.tar.gz"
+    sha256 "3bfa75b0ad0db84096ae777218481852c0ebc6c727b3168c1b9e0118e458cf0a"
   end
 
   resource "priority" do
