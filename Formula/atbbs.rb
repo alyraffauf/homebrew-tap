@@ -7,6 +7,8 @@ class Atbbs < Formula
   sha256 "e775aa4e1d7f9d46e10f3f71e59823f98151dffd5c5a655279f30ade8c577b6f"
   license "AGPL-3.0-or-later"
 
+  depends_on "openssl@3"
+  depends_on "rust" => :build
   depends_on "python@3.14"
 
   resource "aiohappyeyeballs" do

@@ -94,6 +94,8 @@ def generate_formula(version: str, url: str, sha256: str, resources: list[dict])
         f'  sha256 "{sha256}"\n'
         f'  license "AGPL-3.0-or-later"\n'
         f"\n"
+        f'  depends_on "openssl@3"\n'
+        f'  depends_on "rust" => :build\n'
         f'  depends_on "python@3.14"\n'
         f"\n"
         f"{resources_str}\n"
