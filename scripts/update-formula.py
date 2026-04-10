@@ -7,7 +7,7 @@ import time
 import urllib.request
 import sys
 
-C_EXT_PACKAGES = {"cryptography", "cffi", "pycparser", "maturin", "setuptools-rust"}
+C_EXT_PACKAGES = {"maturin", "setuptools-rust"}
 
 
 def get_pypi_info(package: str, version: str | None = None):
@@ -94,7 +94,8 @@ def generate_formula(version: str, url: str, sha256: str, resources: list[dict])
         f'  sha256 "{sha256}"\n'
         f'  license "AGPL-3.0-or-later"\n'
         f"\n"
-        f'  depends_on "cryptography"\n'
+        f'  depends_on "openssl@3"\n'
+        f'  depends_on "rust" => :build\n'
         f'  depends_on "python@3.14"\n'
         f"\n"
         f"{resources_str}\n"
