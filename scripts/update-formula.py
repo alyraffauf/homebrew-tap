@@ -103,7 +103,7 @@ def generate_formula(version: str, url: str, sha256: str, resources: list[dict])
         f"  def install\n"
         f"    if OS.linux?\n"
         f'      python = Formula["python@3.14"]\n'
-        f'      ENV.prepend "CFLAGS", "-I#{{python.opt_include}}/python3.14"\n'
+        f'      ENV.prepend_path "C_INCLUDE_PATH", "#{{python.opt_include}}/python3.14"\n'
         f"    end\n"
         f"    virtualenv_install_with_resources\n"
         f"  end\n"
