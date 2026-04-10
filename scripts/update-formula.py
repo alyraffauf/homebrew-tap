@@ -97,6 +97,10 @@ def generate_formula(version: str, url: str, sha256: str, resources: list[dict])
         f'  depends_on "cryptography"\n'
         f'  depends_on "python@3.14"\n'
         f"\n"
+        f"  on_linux do\n"
+        f'    depends_on "gcc" => :build\n'
+        f"  end\n"
+        f"\n"
         f"{resources_str}\n"
         f"\n"
         f"  def install\n"
