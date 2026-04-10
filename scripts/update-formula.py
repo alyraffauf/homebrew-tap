@@ -7,7 +7,7 @@ import time
 import urllib.request
 import sys
 
-C_EXT_PACKAGES = {"cryptography", "cffi", "pycparser", "maturin", "setuptools-rust"}
+C_EXT_PACKAGES = {"maturin", "setuptools-rust"}
 
 
 def get_pypi_info(package: str, version: str | None = None):
