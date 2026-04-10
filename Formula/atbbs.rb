@@ -150,6 +150,10 @@ class Atbbs < Formula
   end
 
   def install
+    if OS.linux?
+      python = Formula["python@3.14"]
+      ENV.prepend_path "C_INCLUDE_PATH", "#{python.opt_include}/python3.14"
+    end
     virtualenv_install_with_resources
   end
 
