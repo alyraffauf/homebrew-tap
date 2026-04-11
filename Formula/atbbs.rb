@@ -3,8 +3,8 @@ class Atbbs < Formula
 
   desc "AT Protocol bulletin board system"
   homepage "https://github.com/alyraffauf/atbbs"
-  url "https://files.pythonhosted.org/packages/77/1e/c685b4fc1326b3a9ad5af8c65a2dbae2d47f35fb18891e95c55ed5ca30d9/atbbs-0.8.3.tar.gz"
-  sha256 "e775aa4e1d7f9d46e10f3f71e59823f98151dffd5c5a655279f30ade8c577b6f"
+  url "https://files.pythonhosted.org/packages/3a/6c/eb079c0d72d7d861ea88743b1f19f05b12441c3b50d74c91dc5248bbe0a7/atbbs-0.9.0.tar.gz"
+  sha256 "ba906e84bf1763d5af8bb490aca5c93b815268fb7959892006cad30eeb0aeb27"
   license "AGPL-3.0-or-later"
 
   depends_on "cryptography"
@@ -120,8 +120,8 @@ class Atbbs < Formula
   end
 
   resource "rich" do
-    url "https://files.pythonhosted.org/packages/b3/c6/f3b320c27991c46f43ee9d856302c70dc2d0fb2dba4842ff739d5f46b393/rich-14.3.3.tar.gz"
-    sha256 "b8daa0b9e4eef54dd8cf7c86c03713f53241884e814f4e2f5fb342fe520f639b"
+    url "https://files.pythonhosted.org/packages/e9/67/cae617f1351490c25a4b8ac3b8b63a4dda609295d8222bad12242dfdc629/rich-14.3.4.tar.gz"
+    sha256 "817e02727f2b25b40ef56f5aa2217f400c8489f79ca8f46ea2b70dd5e14558a9"
   end
 
   resource "rich-click" do
