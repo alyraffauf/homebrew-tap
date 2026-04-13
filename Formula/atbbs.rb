@@ -3,8 +3,8 @@ class Atbbs < Formula
 
   desc "AT Protocol bulletin board system"
   homepage "https://github.com/alyraffauf/atbbs"
-  url "https://files.pythonhosted.org/packages/4b/13/34556246826b71555d6399c1aedb7670c838aceb2f3d01e0238edfcc1c67/atbbs-0.9.2.tar.gz"
-  sha256 "999a7dda7870cc484a1c5a1190e5a498a424a06fc5d16010c0f2fa053f934085"
+  url "https://files.pythonhosted.org/packages/04/8c/ccfa6bffa1f93731e1786c74e81333ae977a45cfc7944f577c433371fba8/atbbs-0.9.3.tar.gz"
+  sha256 "1b432bfe4e215d130d2d30f3e23f089916844f7123ecdda7f967552b023993e9"
   license "AGPL-3.0-or-later"
 
   depends_on "cryptography"
@@ -40,8 +40,8 @@ class Atbbs < Formula
   end
 
   resource "authlib" do
-    url "https://files.pythonhosted.org/packages/af/98/00d3dd826d46959ad8e32af2dbb2398868fd9fd0683c26e56d0789bd0e68/authlib-1.6.9.tar.gz"
-    sha256 "d8f2421e7e5980cc1ddb4e32d3f5fa659cfaf60d8eaf3281ebed192e4ab74f04"
+    url "https://files.pythonhosted.org/packages/aa/e2/2cd626412bfc3c78b17ca5e5ea8d489f8cae31d40b061f4da0a89068d8a3/authlib-1.6.10.tar.gz"
+    sha256 "856a4f54d6ef3361ca6bb6d14a27e8b88f8097cca795fb428ffe13720e2ecde6"
   end
 
   resource "certifi" do
