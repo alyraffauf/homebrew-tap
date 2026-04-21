@@ -3,8 +3,8 @@ class Atbbs < Formula
 
   desc "AT Protocol bulletin board system"
   homepage "https://github.com/alyraffauf/atbbs"
-  url "https://files.pythonhosted.org/packages/06/d8/723ef9baa394964148af863d750fd151b9d3dddc8b64da69414647570470/atbbs-1.1.0.tar.gz"
-  sha256 "12d4f73d8f84c17e45ad4aebab346e7c7b3099ea5b714148da60243cfea99944"
+  url "https://files.pythonhosted.org/packages/c1/3f/0e06e84de688a31d28ecb9c64a4f65f139db2c2d37c33bbe83dcfbddd9f5/atbbs-1.2.0.tar.gz"
+  sha256 "55eba795a298318b381f5712a553400b309c8ff29582b207501f526212c0411f"
   license "AGPL-3.0-or-later"
 
   depends_on "cryptography"
@@ -75,8 +75,8 @@ class Atbbs < Formula
   end
 
   resource "idna" do
-    url "https://files.pythonhosted.org/packages/6f/6d/0703ccc57f3a7233505399edb88de3cbd678da106337b9fcde432b65ed60/idna-3.11.tar.gz"
-    sha256 "795dafcc9c04ed0c1fb032c2aa73654d8e8c5023a7df64a53f39190ada629902"
+    url "https://files.pythonhosted.org/packages/22/12/2948fbe5513d062169bd91f7d7b1cd97bc8894f32946b71fa39f6e63ca0c/idna-3.12.tar.gz"
+    sha256 "724e9952cc9e2bd7550ea784adb098d837ab5267ef67a1ab9cf7846bdbdd8254"
   end
 
   resource "joserfc" do
