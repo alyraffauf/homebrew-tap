@@ -32,6 +32,7 @@ Linux-only, x86_64 casks.
 | `visual-studio-code-linux` | Visual Studio Code |
 | `opencode-desktop-linux` | OpenCode AI coding agent desktop client |
 | `emacs-app-linux` | Emacs with PGTK (native Wayland/X11) |
+| `obsidian-linux` | Knowledge base on top of local Markdown files |
 
 ```
 brew install --cask zed-linux
