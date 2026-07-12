@@ -21,9 +21,7 @@ cask "todoist-linux" do
   preflight do
     appimage = "#{staged_path}/Todoist-linux-#{version}-x86_64-latest.AppImage"
     FileUtils.chmod "+x", appimage
-    unless system appimage, "--appimage-extract", chdir: staged_path
-      raise "todoist-linux: AppImage extraction failed"
-    end
+    raise "todoist-linux: AppImage extraction failed" unless system appimage, "--appimage-extract", chdir: staged_path
   end
 
   postflight do
@@ -36,7 +34,7 @@ cask "todoist-linux" do
     File.write("#{xdg_data}/applications/todoist.desktop", desktop_content)
 
     Dir.glob("#{staged_path}/squashfs-root/usr/share/icons/hicolor/*/apps/todoist.png").each do |icon|
-      size_dir = File.basename(File.dirname(File.dirname(icon)))
+      size_dir = File.basename(File.dirname(icon, 2))
       target_dir = "#{xdg_data}/icons/hicolor/#{size_dir}/apps"
       FileUtils.mkdir_p target_dir
       FileUtils.cp(icon, "#{target_dir}/todoist.png")
@@ -45,15 +43,15 @@ cask "todoist-linux" do
 
   uninstall_postflight do
     xdg_data = ENV.fetch("XDG_DATA_HOME", "#{Dir.home}/.local/share")
-    FileUtils.rm_f "#{xdg_data}/applications/todoist.desktop"
+    FileUtils.rm("#{xdg_data}/applications/todoist.desktop")
     Dir.glob("#{xdg_data}/icons/hicolor/*/apps/todoist.png").each do |icon|
-      FileUtils.rm_f icon
+      FileUtils.rm(icon)
     end
   end
 
   zap trash: [
+    "#{ENV.fetch("XDG_CACHE_HOME", "#{Dir.home}/.cache")}/Todoist",
     "#{ENV.fetch("XDG_CONFIG_HOME", "#{Dir.home}/.config")}/Todoist",
     "#{ENV.fetch("XDG_DATA_HOME", "#{Dir.home}/.local/share")}/Todoist",
-    "#{ENV.fetch("XDG_CACHE_HOME", "#{Dir.home}/.cache")}/Todoist",
   ]
 end
