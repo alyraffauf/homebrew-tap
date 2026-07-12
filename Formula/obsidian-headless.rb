@@ -30,6 +30,6 @@ class ObsidianHeadless < Formula
   end
 
   test do
-    assert_match "0.0.13", shell_output("#{bin}/ob --version")
+    assert_match version.to_s, shell_output("#{bin}/ob --version")
   end
 end

@@ -87,9 +87,11 @@ jobs:
           # real dir and breaks setup-homebrew's post-run cleanup (fails the job).
           brew style "alyraffauf/tap/${{ matrix.cask }}"
           brew audit --cask --online "alyraffauf/tap/${{ matrix.cask }}"
-          # Downloads the artifact and verifies the sha256 — catches a bad bump
-          # without pulling heavy cask dependencies.
-          brew fetch --cask "alyraffauf/tap/${{ matrix.cask }}"
+          # Actually install (and uninstall) the cask: verifies the sha256 and,
+          # crucially, that the artifact/binary paths and pre/postflight logic match
+          # the real payload — the class of bug that ships an un-installable cask.
+          brew install --cask "alyraffauf/tap/${{ matrix.cask }}"
+          brew uninstall --cask "alyraffauf/tap/${{ matrix.cask }}"
 
   # Single required status check for branch protection. Stays stable as the
   # matrix grows/shrinks; passes when every needed job succeeded or was skipped.

@@ -36,6 +36,6 @@ Linux-only, x86_64 casks.
 
 - **`atbbs`** and **`dewy`** are updated by their own release-triggered workflows.
 - **`tg`** and all casks are bumped daily by `brew bump` (`.github/workflows/bump.yml`), which opens a PR per outdated package and enables auto-merge.
-- CI (`.github/workflows/ci.yml`) runs `brew style` + `brew audit`, formula install/test on macOS and Linux, and `brew fetch --cask` to verify cask checksums. The `ci-complete` job is the required status check.
+- CI (`.github/workflows/ci.yml`) runs `brew style` + `brew audit`, formula install/test on macOS and Linux, and cask install/uninstall on Linux to verify checksums and artifact hooks. The `ci-complete` job is the required status check.
 
 Auto-merge requires **Settings → General → Allow auto-merge** enabled, and a branch protection rule on `main` requiring the **`ci-complete`** check.
