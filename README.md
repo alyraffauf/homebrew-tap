@@ -34,6 +34,7 @@ Linux-only, x86_64 casks.
 | `emacs-app-linux` | Emacs with PGTK (native Wayland/X11) |
 | `obsidian-linux` | Knowledge base on top of local Markdown files |
 | `helium-linux` | Private, fast, and honest web browser |
+| `todoist-linux` | To-do list and task manager |
 
 ```
 brew install --cask zed-linux
