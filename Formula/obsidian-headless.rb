@@ -7,6 +7,11 @@ class ObsidianHeadless < Formula
 
   depends_on "node"
 
+  on_linux do
+    depends_on "python@3.13" => :build
+    depends_on "gcc" => :build
+  end
+
   livecheck do
     url "https://registry.npmjs.org/obsidian-headless/latest"
     strategy :json do |json|
@@ -15,6 +20,7 @@ class ObsidianHeadless < Formula
   end
 
   def install
+    ENV["npm_config_python"] = Formula["python@3.13"].opt_bin/"python3" if OS.linux?
     system "npm", "install", *std_npm_args
     bin.install_symlink libexec/"bin/ob"
   end
