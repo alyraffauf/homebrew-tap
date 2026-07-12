@@ -58,10 +58,9 @@ jobs:
       - name: Test ${{ matrix.formula }}
         run: |
           set -euo pipefail
-          # setup-homebrew auto-taps this repo from GitHub; re-point the tap at the
-          # checked-out PR code so we test the proposed change, not the merged tip.
-          brew untap --force alyraffauf/tap 2>/dev/null || true
-          brew tap alyraffauf/tap "$PWD"
+          # setup-homebrew already links this checked-out PR as the `alyraffauf/tap`
+          # tap, so reference it directly. Re-tapping replaces its symlink with a
+          # real dir and breaks setup-homebrew's post-run cleanup (fails the job).
           brew style "alyraffauf/tap/${{ matrix.formula }}"
           brew audit --formula --online "alyraffauf/tap/${{ matrix.formula }}"
           brew install --build-from-source "alyraffauf/tap/${{ matrix.formula }}"
@@ -83,10 +82,9 @@ jobs:
       - name: Audit ${{ matrix.cask }}
         run: |
           set -euo pipefail
-          # setup-homebrew auto-taps this repo from GitHub; re-point the tap at the
-          # checked-out PR code so we test the proposed change, not the merged tip.
-          brew untap --force alyraffauf/tap 2>/dev/null || true
-          brew tap alyraffauf/tap "$PWD"
+          # setup-homebrew already links this checked-out PR as the `alyraffauf/tap`
+          # tap, so reference it directly. Re-tapping replaces its symlink with a
+          # real dir and breaks setup-homebrew's post-run cleanup (fails the job).
           brew style "alyraffauf/tap/${{ matrix.cask }}"
           brew audit --cask --online "alyraffauf/tap/${{ matrix.cask }}"
           # Downloads the artifact and verifies the sha256 — catches a bad bump

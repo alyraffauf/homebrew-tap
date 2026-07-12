@@ -24,13 +24,12 @@ brew install tg
 
 ## Casks
 
-Linux-only casks, mirrored here from the [Universal Blue](https://github.com/ublue-os) taps.
+Linux-only, x86_64 casks, mirrored here from the [Universal Blue](https://github.com/ublue-os) taps.
 
 | Cask | Description |
 |------|-------------|
 | `zed-linux` | Zed code editor (stable) |
 | `visual-studio-code-linux` | Visual Studio Code |
-| `opencode-desktop-linux` | OpenCode AI coding agent desktop client |
 | `emacs-app-linux` | Emacs with PGTK (native Wayland/X11) |
 
 ```
