@@ -31,15 +31,6 @@ cask "emacs-app-linux" do
   manpage "emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64/share/man/man1/emacs.1.gz"
   manpage "emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64/share/man/man1/emacsclient.1.gz"
   manpage "emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64/share/man/man1/etags.1.gz"
-  # Libraries (needed for emacs to run)
-  artifact "emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64/lib",
-           target: "#{HOMEBREW_PREFIX}/opt/emacs-app-linux/lib"
-  # Share directory (elisp, icons, schemas, man pages, etc.)
-  artifact "emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64/share",
-           target: "#{HOMEBREW_PREFIX}/opt/emacs-app-linux/share"
-  # Libexec (helper binaries and compiled modules)
-  artifact "emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64/libexec",
-           target: "#{HOMEBREW_PREFIX}/opt/emacs-app-linux/libexec"
 
   preflight do
     emacs_version = version.split("-").first
@@ -62,19 +53,27 @@ cask "emacs-app-linux" do
     script_path = "#{staged_prefix}/run-emacs.sh"
     content = File.read(script_path)
 
+    # Resolve symlinks so $SCRIPT_DIR points to the Caskroom, not bin/
+    matched = content.gsub!(
+      'SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"',
+      'SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"',
+    )
+    raise "emacs-app-linux: could not find SCRIPT_DIR definition in run-emacs.sh" if matched.nil?
+
     # Add tree-sitter and libgccjit paths after the Homebrew lib path check
     homebrew_paths = <<~PATHS
       # Add Homebrew paths if they exist (for systems like immutable distros)
-      if [ -d "/home/linuxbrew/.linuxbrew/lib" ]; then
-        export LD_LIBRARY_PATH="/home/linuxbrew/.linuxbrew/lib:$LD_LIBRARY_PATH"
+      HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-/home/linuxbrew/.linuxbrew}"
+      if [ -d "$HOMEBREW_PREFIX/lib" ]; then
+        export LD_LIBRARY_PATH="$HOMEBREW_PREFIX/lib:$LD_LIBRARY_PATH"
       fi
       # Add libgccjit (required for native compilation)
-      if [ -d "/home/linuxbrew/.linuxbrew/opt/libgccjit/lib/gcc/current" ]; then
-        export LD_LIBRARY_PATH="/home/linuxbrew/.linuxbrew/opt/libgccjit/lib/gcc/current:$LD_LIBRARY_PATH"
+      if [ -d "$HOMEBREW_PREFIX/opt/libgccjit/lib/gcc/current" ]; then
+        export LD_LIBRARY_PATH="$HOMEBREW_PREFIX/opt/libgccjit/lib/gcc/current:$LD_LIBRARY_PATH"
       fi
       # Add tree-sitter@0.25 (keg-only)
-      if [ -d "/home/linuxbrew/.linuxbrew/opt/tree-sitter@0.25/lib" ]; then
-        export LD_LIBRARY_PATH="/home/linuxbrew/.linuxbrew/opt/tree-sitter@0.25/lib:$LD_LIBRARY_PATH"
+      if [ -d "$HOMEBREW_PREFIX/opt/tree-sitter@0.25/lib" ]; then
+        export LD_LIBRARY_PATH="$HOMEBREW_PREFIX/opt/tree-sitter@0.25/lib:$LD_LIBRARY_PATH"
       fi
     PATHS
 
@@ -88,19 +87,10 @@ cask "emacs-app-linux" do
     emacs_env_vars = <<~ENVVARS
       export GSETTINGS_SCHEMA_DIR="$SCRIPT_DIR/share/glib-2.0/schemas"
 
-      # Set Emacs data directories (use Homebrew opt path when symlinked)
-      if [ -d "/home/linuxbrew/.linuxbrew/opt/emacs-app-linux/share/emacs/#{emacs_version}" ]; then
-        export EMACSDATA="/home/linuxbrew/.linuxbrew/opt/emacs-app-linux/share/emacs/#{emacs_version}/etc"
-        export EMACSPATH="/home/linuxbrew/.linuxbrew/opt/emacs-app-linux/libexec/emacs/#{emacs_version}/#{target_triplet}"
-        export EMACSDOC="/home/linuxbrew/.linuxbrew/opt/emacs-app-linux/share/emacs/#{emacs_version}/etc"
-        # Set EMACSLOADPATH with trailing colon to make Emacs use this path and automatically append subdirectories
-        export EMACSLOADPATH="/home/linuxbrew/.linuxbrew/opt/emacs-app-linux/share/emacs/#{emacs_version}/lisp:"
-      else
-        export EMACSDATA="$SCRIPT_DIR/share/emacs/#{emacs_version}/etc"
-        export EMACSPATH="$SCRIPT_DIR/bin"
-        export EMACSDOC="$SCRIPT_DIR/share/emacs/#{emacs_version}/etc"
-        export EMACSLOADPATH="$SCRIPT_DIR/share/emacs/#{emacs_version}/lisp:"
-      fi
+      export EMACSDATA="$SCRIPT_DIR/share/emacs/#{emacs_version}/etc"
+      export EMACSPATH="$SCRIPT_DIR/libexec/emacs/#{emacs_version}/#{target_triplet}"
+      export EMACSDOC="$SCRIPT_DIR/share/emacs/#{emacs_version}/etc"
+      export EMACSLOADPATH="$SCRIPT_DIR/share/emacs/#{emacs_version}/lisp:"
     ENVVARS
 
     matched = content.gsub!(
@@ -114,12 +104,13 @@ cask "emacs-app-linux" do
 
   postflight do
     xdg_data = ENV.fetch("XDG_DATA_HOME", "#{Dir.home}/.local/share")
+    emacs_version = version.split("-").first
+    emacs_root = "#{staged_path}/emacs-pgtk-#{emacs_version}-fedora-latest-amd64"
+
     # Create necessary directories
     FileUtils.mkdir_p "#{xdg_data}/applications"
     FileUtils.mkdir_p "#{xdg_data}/icons/hicolor"
     FileUtils.mkdir_p "#{xdg_data}/glib-2.0/schemas"
-
-    emacs_root = "#{HOMEBREW_PREFIX}/opt/emacs-app-linux"
 
     # Copy compiled gschemas
     if File.exist?("#{emacs_root}/share/glib-2.0/schemas/gschemas.compiled")
@@ -152,7 +143,6 @@ cask "emacs-app-linux" do
     end
 
     # Install desktop files with corrected Exec paths
-    emacs_version = version.split("-").first
     emacs_wm_class = "emacs-#{emacs_version.tr(".", "-")}"
     desktop_files = %w[emacs emacsclient emacs-mail emacsclient-mail]
     desktop_files.each do |desktop_name|
