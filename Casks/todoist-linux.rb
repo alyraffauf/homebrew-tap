@@ -16,7 +16,7 @@ cask "todoist-linux" do
     end
   end
 
-  binary "todoist", target: "todoist"
+  binary "Todoist-linux-#{version}-x86_64-latest.AppImage", target: "todoist"
 
   preflight do
     appimage = "#{staged_path}/Todoist-linux-#{version}-x86_64-latest.AppImage"
