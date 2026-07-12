@@ -53,11 +53,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: Homebrew/actions/setup-homebrew@master
+      - uses: Homebrew/actions/setup-homebrew@1f8e202ffddf94def7f42f6fa3a482e821489f9c
 
       - name: Test ${{ matrix.formula }}
         run: |
           set -euo pipefail
+          # setup-homebrew auto-taps this repo from GitHub; re-point the tap at the
+          # checked-out PR code so we test the proposed change, not the merged tip.
+          brew untap --force alyraffauf/tap 2>/dev/null || true
           brew tap alyraffauf/tap "$PWD"
           brew style "alyraffauf/tap/${{ matrix.formula }}"
           brew audit --formula --online "alyraffauf/tap/${{ matrix.formula }}"
@@ -75,11 +78,14 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - uses: Homebrew/actions/setup-homebrew@master
+      - uses: Homebrew/actions/setup-homebrew@1f8e202ffddf94def7f42f6fa3a482e821489f9c
 
       - name: Audit ${{ matrix.cask }}
         run: |
           set -euo pipefail
+          # setup-homebrew auto-taps this repo from GitHub; re-point the tap at the
+          # checked-out PR code so we test the proposed change, not the merged tip.
+          brew untap --force alyraffauf/tap 2>/dev/null || true
           brew tap alyraffauf/tap "$PWD"
           brew style "alyraffauf/tap/${{ matrix.cask }}"
           brew audit --cask --online "alyraffauf/tap/${{ matrix.cask }}"

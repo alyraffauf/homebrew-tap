@@ -14,12 +14,12 @@ jobs:
     steps:
       - name: Generate token
         id: app-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v2
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - uses: Homebrew/actions/setup-homebrew@master
+      - uses: Homebrew/actions/setup-homebrew@1f8e202ffddf94def7f42f6fa3a482e821489f9c
 
       - name: Configure git identity
         run: |
@@ -34,25 +34,28 @@ jobs:
           # resulting PRs trigger the CI workflow, so auto-merge has checks to wait on.
           HOMEBREW_GITHUB_API_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          set -euo pipefail
+          set -uo pipefail
           brew tap --force alyraffauf/tap
           tap_dir="$(brew --repository)/Library/Taps/alyraffauf/homebrew-tap"
 
           # atbbs (resource regeneration) and dewy have their own release-triggered
           # workflows, so brew bump owns everything else: tg + the casks.
-          formulae=$(ls "$tap_dir"/Formula/*.rb | xargs -n1 basename | sed 's/\.rb$//' \
-            | grep -vE '^(atbbs|dewy)$' | sed 's#^#alyraffauf/tap/#' | paste -sd' ' -)
-          casks=$(ls "$tap_dir"/Casks/*.rb | xargs -n1 basename | sed 's/\.rb$//' \
-            | sed 's#^#alyraffauf/tap/#' | paste -sd' ' -)
-
-          if [ -n "$formulae" ]; then
-            echo "Bumping formulae: $formulae"
-            brew bump --formula --open-pr --no-fork $formulae
-          fi
-          if [ -n "$casks" ]; then
-            echo "Bumping casks: $casks"
-            brew bump --cask --open-pr --no-fork $casks
-          fi
+          # Bump each package independently so one failure can't abort the rest or
+          # skip the auto-merge step below.
+          rc=0
+          for f in $(ls "$tap_dir"/Formula/*.rb | xargs -n1 basename | sed 's/\.rb$//' | grep -vE '^(atbbs|dewy)$'); do
+            echo "::group::bump formula $f"
+            brew bump --formula --open-pr --no-fork "alyraffauf/tap/$f" || { echo "::warning::bump failed for formula $f"; rc=1; }
+            echo "::endgroup::"
+          done
+          for c in $(ls "$tap_dir"/Casks/*.rb | xargs -n1 basename | sed 's/\.rb$//'); do
+            echo "::group::bump cask $c"
+            brew bump --cask --open-pr --no-fork "alyraffauf/tap/$c" || { echo "::warning::bump failed for cask $c"; rc=1; }
+            echo "::endgroup::"
+          done
+          # Don't fail the job on individual bump failures — the auto-merge step must
+          # still run for the PRs that did open. Summarize instead.
+          [ "$rc" -eq 0 ] && echo "All bumps succeeded." || echo "Some bumps failed (see warnings above)."
 
       - name: Enable auto-merge on bump PRs
         env:

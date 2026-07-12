@@ -1,11 +1,8 @@
 cask "emacs-app-linux" do
-  arch arm: "arm64", intel: "amd64"
-
   version "30.2-18"
-  sha256 on_arch_conditional intel: "2d3d1c145fe8f0edf51f1275c5109eee116f98e2899498ca710ab96858fa0a70",
-                             arm:   "d2471179e3a7691148a585c04c573a9dc95ee26b448624f4a8131d73c2234698"
+  sha256 "2d3d1c145fe8f0edf51f1275c5109eee116f98e2899498ca710ab96858fa0a70"
 
-  url "https://github.com/daegalus/linux-app-builds/releases/download/emacs-pgtk-#{version}/emacs-pgtk-#{version.split("-").first}-fedora-latest-#{arch}.tar.gz",
+  url "https://github.com/daegalus/linux-app-builds/releases/download/emacs-pgtk-#{version}/emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64.tar.gz",
       verified: "github.com/daegalus/linux-app-builds/"
   name "Emacs PGTK"
   desc "Text editor with PGTK support (Native Wayland and X11)"
@@ -20,33 +17,31 @@ cask "emacs-app-linux" do
   depends_on formula: "tree-sitter@0.25"
 
   # Binaries
-  binary "emacs-pgtk-#{version.split("-").first}-fedora-latest-#{arch}/run-emacs.sh", target: "emacs"
-  binary "emacs-pgtk-#{version.split("-").first}-fedora-latest-#{arch}/bin/emacs-#{version.split("-").first}", target: "emacs-#{version.split("-").first}"
-  binary "emacs-pgtk-#{version.split("-").first}-fedora-latest-#{arch}/bin/emacsclient"
-  binary "emacs-pgtk-#{version.split("-").first}-fedora-latest-#{arch}/bin/ctags"
-  binary "emacs-pgtk-#{version.split("-").first}-fedora-latest-#{arch}/bin/ebrowse"
-  binary "emacs-pgtk-#{version.split("-").first}-fedora-latest-#{arch}/bin/etags"
+  binary "emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64/run-emacs.sh", target: "emacs"
+  binary "emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64/bin/emacs-#{version.split("-").first}", target: "emacs-#{version.split("-").first}"
+  binary "emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64/bin/emacsclient"
+  binary "emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64/bin/ctags"
+  binary "emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64/bin/ebrowse"
+  binary "emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64/bin/etags"
   # Man pages
-  manpage "emacs-pgtk-#{version.split("-").first}-fedora-latest-#{arch}/share/man/man1/ctags.1.gz"
-  manpage "emacs-pgtk-#{version.split("-").first}-fedora-latest-#{arch}/share/man/man1/ebrowse.1.gz"
-  manpage "emacs-pgtk-#{version.split("-").first}-fedora-latest-#{arch}/share/man/man1/emacs.1.gz"
-  manpage "emacs-pgtk-#{version.split("-").first}-fedora-latest-#{arch}/share/man/man1/emacsclient.1.gz"
-  manpage "emacs-pgtk-#{version.split("-").first}-fedora-latest-#{arch}/share/man/man1/etags.1.gz"
+  manpage "emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64/share/man/man1/ctags.1.gz"
+  manpage "emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64/share/man/man1/ebrowse.1.gz"
+  manpage "emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64/share/man/man1/emacs.1.gz"
+  manpage "emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64/share/man/man1/emacsclient.1.gz"
+  manpage "emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64/share/man/man1/etags.1.gz"
   # Libraries (needed for emacs to run)
-  artifact "emacs-pgtk-#{version.split("-").first}-fedora-latest-#{arch}/lib",
+  artifact "emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64/lib",
            target: "#{HOMEBREW_PREFIX}/opt/emacs-app-linux/lib"
   # Share directory (elisp, icons, schemas, man pages, etc.)
-  artifact "emacs-pgtk-#{version.split("-").first}-fedora-latest-#{arch}/share",
+  artifact "emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64/share",
            target: "#{HOMEBREW_PREFIX}/opt/emacs-app-linux/share"
   # Libexec (helper binaries and compiled modules)
-  artifact "emacs-pgtk-#{version.split("-").first}-fedora-latest-#{arch}/libexec",
+  artifact "emacs-pgtk-#{version.split("-").first}-fedora-latest-amd64/libexec",
            target: "#{HOMEBREW_PREFIX}/opt/emacs-app-linux/libexec"
 
   preflight do
-    arch_str = on_arch_conditional arm: "arm64", intel: "amd64"
-
     emacs_version = version.split("-").first
-    staged_prefix = "#{staged_path}/emacs-pgtk-#{emacs_version}-fedora-latest-#{arch_str}"
+    staged_prefix = "#{staged_path}/emacs-pgtk-#{emacs_version}-fedora-latest-amd64"
 
     # Make run-emacs.sh executable
     FileUtils.chmod "+x", "#{staged_prefix}/run-emacs.sh"
@@ -54,7 +49,7 @@ cask "emacs-app-linux" do
     # Create symlink to pdmp file in bin directory - Emacs automatically finds it there
     # Emacs looks for {binary-name}.pdmp next to the binary (e.g., emacs-30.2.pdmp)
     # Using a relative symlink saves ~12MB compared to copying
-    target_triplet = on_arch_conditional arm: "aarch64-unknown-linux-gnu", intel: "x86_64-pc-linux-gnu"
+    target_triplet = "x86_64-pc-linux-gnu"
     pdmp_source = Dir.glob("#{staged_prefix}/libexec/emacs/#{emacs_version}/#{target_triplet}/*.pdmp").first
     if pdmp_source
       relative_path = "../libexec/emacs/#{emacs_version}/#{target_triplet}/#{File.basename(pdmp_source)}"
