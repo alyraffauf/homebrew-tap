@@ -29,8 +29,8 @@ cask "opencode-desktop-linux" do
   preflight do
     rpm2cpio = Formula["rpm2cpio"].bin/"rpm2cpio"
     cpio = Formula["cpio"].bin/"cpio"
-    unless system "sh", "-c", "'#{rpm2cpio}' '#{staged_path}/opencode-desktop-linux-x86_64.rpm' | '#{cpio}' -idm --quiet",
-                   chdir: staged_path
+    extract_command = "'#{rpm2cpio}' '#{staged_path}/opencode-desktop-linux-x86_64.rpm' | '#{cpio}' -idm --quiet"
+    unless system "sh", "-c", extract_command, chdir: staged_path
       raise "opencode-desktop-linux: RPM extraction failed"
     end
 
@@ -39,10 +39,10 @@ cask "opencode-desktop-linux" do
     # The Electron entrypoint is the lone executable that isn't a Chromium helper.
     exe = Dir.children(app_dir).sort.find do |f|
       path = "#{app_dir}/#{f}"
-      next false unless File.file?(path) && File.executable?(path)
+      next false if !File.file?(path) || !File.executable?(path)
       next false if ["chrome-sandbox", "chrome_crashpad_handler"].include?(f)
 
-      f !~ /\.(so|pak|bin|dat|json|html|txt)$/ && f !~ /\.so\./
+      f !~ /\.(so|pak|bin|dat|json|html|txt)$/ && f.exclude?(".so.")
     end
     raise "opencode-desktop-linux: no Electron binary found in #{app_dir}" if exe.nil?
 
@@ -87,13 +87,13 @@ cask "opencode-desktop-linux" do
 
   uninstall_postflight do
     xdg_data = ENV.fetch("XDG_DATA_HOME", "#{Dir.home}/.local/share")
-    FileUtils.rm_f "#{xdg_data}/applications/opencode-desktop.desktop"
-    FileUtils.rm_f "#{xdg_data}/icons/hicolor/128x128/apps/opencode-desktop.png"
+    FileUtils.rm("#{xdg_data}/applications/opencode-desktop.desktop")
+    FileUtils.rm("#{xdg_data}/icons/hicolor/128x128/apps/opencode-desktop.png")
   end
 
   zap trash: [
-    "~/.cache/ai.opencode.desktop",
-    "~/.config/ai.opencode.desktop",
-    "~/.local/share/ai.opencode.desktop",
+    "#{ENV.fetch("XDG_CACHE_HOME", "#{Dir.home}/.cache")}/ai.opencode.desktop",
+    "#{ENV.fetch("XDG_CONFIG_HOME", "#{Dir.home}/.config")}/ai.opencode.desktop",
+    "#{ENV.fetch("XDG_DATA_HOME", "#{Dir.home}/.local/share")}/ai.opencode.desktop",
   ]
 end
