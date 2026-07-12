@@ -43,14 +43,19 @@ jobs:
           # Bump each package independently so one failure can't abort the rest or
           # skip the auto-merge step below.
           rc=0
-          for f in $(ls "$tap_dir"/Formula/*.rb | xargs -n1 basename | sed 's/\.rb$//' | grep -vE '^(atbbs|dewy)$'); do
-            echo "::group::bump formula $f"
-            brew bump --formula --open-pr --no-fork "alyraffauf/tap/$f" || { echo "::warning::bump failed for formula $f"; rc=1; }
+          for f in "$tap_dir"/Formula/*.rb; do
+            formula=$(basename "$f" .rb)
+            case "$formula" in
+              atbbs|dewy) continue ;;
+            esac
+            echo "::group::bump formula $formula"
+            brew bump --formula --open-pr --no-fork "alyraffauf/tap/$formula" || { echo "::warning::bump failed for formula $formula"; rc=1; }
             echo "::endgroup::"
           done
-          for c in $(ls "$tap_dir"/Casks/*.rb | xargs -n1 basename | sed 's/\.rb$//'); do
-            echo "::group::bump cask $c"
-            brew bump --cask --open-pr --no-fork "alyraffauf/tap/$c" || { echo "::warning::bump failed for cask $c"; rc=1; }
+          for c in "$tap_dir"/Casks/*.rb; do
+            cask=$(basename "$c" .rb)
+            echo "::group::bump cask $cask"
+            brew bump --cask --open-pr --no-fork "alyraffauf/tap/$cask" || { echo "::warning::bump failed for cask $cask"; rc=1; }
             echo "::endgroup::"
           done
           # Don't fail the job on individual bump failures — the auto-merge step must

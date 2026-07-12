@@ -39,13 +39,7 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Update formula
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          URL="https://github.com/alyraffauf/dewy/archive/refs/tags/v${VERSION}.tar.gz"
-          SHA256=$(curl -sL "$URL" | sha256sum | awk '{print $1}')
-
-          sed -i "s|url \".*\"|url \"$URL\"|" Formula/dewy.rb
-          sed -i "s|sha256 \".*\"|sha256 \"$SHA256\"|" Formula/dewy.rb
+        run: python3 scripts/update-dewy.py ${{ steps.version.outputs.version }}
 
       - name: Create pull request
         id: create-pr
