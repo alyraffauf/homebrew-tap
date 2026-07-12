@@ -34,13 +34,13 @@ cask "helium-linux" do
 
   uninstall_postflight do
     xdg_data = ENV.fetch("XDG_DATA_HOME", "#{Dir.home}/.local/share")
-    FileUtils.rm_f "#{xdg_data}/applications/helium.desktop"
-    FileUtils.rm_f "#{xdg_data}/icons/hicolor/256x256/apps/helium.png"
+    FileUtils.rm("#{xdg_data}/applications/helium.desktop")
+    FileUtils.rm("#{xdg_data}/icons/hicolor/256x256/apps/helium.png")
   end
 
   zap trash: [
+    "#{ENV.fetch("XDG_CACHE_HOME", "#{Dir.home}/.cache")}/helium",
     "#{ENV.fetch("XDG_CONFIG_HOME", "#{Dir.home}/.config")}/helium",
     "#{ENV.fetch("XDG_DATA_HOME", "#{Dir.home}/.local/share")}/helium",
-    "#{ENV.fetch("XDG_CACHE_HOME", "#{Dir.home}/.cache")}/helium",
   ]
 end
