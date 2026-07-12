@@ -2,10 +2,11 @@
 
 Homebrew tap hosting personal projects and Linux-only casks maintained by [@alyraffauf](https://github.com/alyraffauf).
 
-## Usage
+## Setup
 
 ```
 brew tap alyraffauf/tap
+brew trust alyraffauf/tap
 ```
 
 ## Formulae
