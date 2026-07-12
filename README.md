@@ -17,13 +17,6 @@ brew tap alyraffauf/tap
 | `obsidian-headless` | Headless client for Obsidian Sync and Publish |
 | `tg` | Command-line client for Tangled, the git forge built on atproto |
 
-```
-brew install atbbs
-brew install dewy
-brew install obsidian-headless
-brew install tg
-```
-
 ## Casks
 
 Linux-only, x86_64 casks.
@@ -37,10 +30,6 @@ Linux-only, x86_64 casks.
 | `todoist-linux` | To-do list and task manager |
 | `visual-studio-code-linux` | Visual Studio Code |
 | `zed-linux` | Zed code editor (stable) |
-
-```
-brew install --cask zed-linux
-```
 
 ## Automation
 
