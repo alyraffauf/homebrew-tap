@@ -33,6 +33,7 @@ Linux-only, x86_64 casks.
 | `opencode-desktop-linux` | OpenCode AI coding agent desktop client |
 | `emacs-app-linux` | Emacs with PGTK (native Wayland/X11) |
 | `obsidian-linux` | Knowledge base on top of local Markdown files |
+| `helium-linux` | Private, fast, and honest web browser |
 
 ```
 brew install --cask zed-linux
