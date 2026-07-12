@@ -1,0 +1,69 @@
+name: Bump packages
+
+on:
+  schedule:
+    - cron: "0 8 * * *" # daily at 08:00 UTC
+  workflow_dispatch:
+
+jobs:
+  bump:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Generate token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Configure git identity
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Open bump PRs
+        env:
+          HOMEBREW_DEVELOPER: 1
+          HOMEBREW_NO_INSTALL_FROM_API: 1
+          # Opening PRs as the app (not the default GITHUB_TOKEN) is what lets the
+          # resulting PRs trigger the CI workflow, so auto-merge has checks to wait on.
+          HOMEBREW_GITHUB_API_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          brew tap --force alyraffauf/tap
+          tap_dir="$(brew --repository)/Library/Taps/alyraffauf/homebrew-tap"
+
+          # atbbs (resource regeneration) and dewy have their own release-triggered
+          # workflows, so brew bump owns everything else: tg + the casks.
+          formulae=$(ls "$tap_dir"/Formula/*.rb | xargs -n1 basename | sed 's/\.rb$//' \
+            | grep -vE '^(atbbs|dewy)$' | sed 's#^#alyraffauf/tap/#' | paste -sd' ' -)
+          casks=$(ls "$tap_dir"/Casks/*.rb | xargs -n1 basename | sed 's/\.rb$//' \
+            | sed 's#^#alyraffauf/tap/#' | paste -sd' ' -)
+
+          if [ -n "$formulae" ]; then
+            echo "Bumping formulae: $formulae"
+            brew bump --formula --open-pr --no-fork $formulae
+          fi
+          if [ -n "$casks" ]; then
+            echo "Bumping casks: $casks"
+            brew bump --cask --open-pr --no-fork $casks
+          fi
+
+      - name: Enable auto-merge on bump PRs
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          prs=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open \
+            --json number,headRefName \
+            --jq '.[] | select(.headRefName | startswith("bump-")) | .number')
+          for pr in $prs; do
+            echo "Enabling auto-merge for #$pr"
+            gh pr merge "$pr" --auto --squash \
+              || echo "::warning::Could not enable auto-merge for #$pr — enable 'Allow auto-merge' in repo settings and require the 'ci-complete' check in branch protection."
+          done

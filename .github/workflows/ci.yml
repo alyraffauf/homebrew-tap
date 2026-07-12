@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+# One in-flight run per PR/branch; newer pushes cancel older runs.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect:
+    runs-on: ubuntu-24.04
+    outputs:
+      formulae: ${{ steps.changed.outputs.formulae }}
+      casks: ${{ steps.changed.outputs.casks }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed packages
+        id: changed
+        run: |
+          set -euo pipefail
+          to_json() { xargs -r -n1 basename | sed 's/\.rb$//' | jq -R -s -c 'split("\n") | map(select(length > 0))'; }
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            range="origin/${{ github.base_ref }}...HEAD"
+            formulae=$(git diff --name-only "$range" -- Formula/ | to_json)
+            casks=$(git diff --name-only "$range" -- Casks/ | to_json)
+          else
+            # Manual runs test the whole tap.
+            formulae=$(ls Formula/*.rb 2>/dev/null | to_json)
+            casks=$(ls Casks/*.rb 2>/dev/null | to_json)
+          fi
+
+          echo "formulae=$formulae" >> "$GITHUB_OUTPUT"
+          echo "casks=$casks" >> "$GITHUB_OUTPUT"
+          echo "Changed formulae: $formulae"
+          echo "Changed casks: $casks"
+
+  formulae:
+    needs: detect
+    if: needs.detect.outputs.formulae != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-24.04]
+        formula: ${{ fromJson(needs.detect.outputs.formulae) }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Test ${{ matrix.formula }}
+        run: |
+          set -euo pipefail
+          brew tap alyraffauf/tap "$PWD"
+          brew style "alyraffauf/tap/${{ matrix.formula }}"
+          brew audit --formula --online "alyraffauf/tap/${{ matrix.formula }}"
+          brew install --build-from-source "alyraffauf/tap/${{ matrix.formula }}"
+          brew test "alyraffauf/tap/${{ matrix.formula }}"
+
+  casks:
+    needs: detect
+    if: needs.detect.outputs.casks != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        # Casks in this tap are Linux-only (`*-linux`).
+        cask: ${{ fromJson(needs.detect.outputs.casks) }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Audit ${{ matrix.cask }}
+        run: |
+          set -euo pipefail
+          brew tap alyraffauf/tap "$PWD"
+          brew style "alyraffauf/tap/${{ matrix.cask }}"
+          brew audit --cask --online "alyraffauf/tap/${{ matrix.cask }}"
+          # Downloads the artifact and verifies the sha256 — catches a bad bump
+          # without pulling heavy cask dependencies.
+          brew fetch --cask "alyraffauf/tap/${{ matrix.cask }}"
+
+  # Single required status check for branch protection. Stays stable as the
+  # matrix grows/shrinks; passes when every needed job succeeded or was skipped.
+  ci-complete:
+    if: always()
+    needs: [detect, formulae, casks]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Verify no required job failed
+        run: |
+          set -euo pipefail
+          echo "detect=${{ needs.detect.result }} formulae=${{ needs.formulae.result }} casks=${{ needs.casks.result }}"
+          for result in "${{ needs.detect.result }}" "${{ needs.formulae.result }}" "${{ needs.casks.result }}"; do
+            if [ "$result" = "failure" ] || [ "$result" = "cancelled" ]; then
+              echo "::error::A required CI job did not pass."
+              exit 1
+            fi
+          done
+          echo "All required jobs passed (or were skipped)."
