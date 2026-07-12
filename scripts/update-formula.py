@@ -4,10 +4,12 @@
 import json
 import subprocess
 import time
+import urllib.error
 import urllib.request
 import sys
 
 C_EXT_PACKAGES = {"cryptography", "cffi", "pycparser", "maturin", "setuptools-rust"}
+PYPI_REQUEST_TIMEOUT_SECONDS = 30
 
 
 def get_pypi_info(package: str, version: str | None = None):
@@ -16,8 +18,11 @@ def get_pypi_info(package: str, version: str | None = None):
         if not version
         else f"https://pypi.org/pypi/{package}/{version}/json"
     )
-    with urllib.request.urlopen(url) as r:
-        return json.loads(r.read())
+    try:
+        with urllib.request.urlopen(url, timeout=PYPI_REQUEST_TIMEOUT_SECONDS) as response:
+            return json.loads(response.read())
+    except urllib.error.HTTPError as error:
+        sys.exit(f"Failed to fetch {url}: HTTP {error.code} {error.reason}")
 
 
 def get_sdist(pypi_data: dict) -> tuple[str, str]:
@@ -67,9 +72,9 @@ def resolve_deps(
             wait = 30 * (attempt + 1)
             print(f"  Resolve failed, retrying in {wait}s (PyPI propagation delay)...")
             time.sleep(wait)
-
-    print(result.stderr, file=sys.stderr)  # type: ignore[possibly-undefined]
-    sys.exit(1)
+        else:
+            print(result.stderr, file=sys.stderr)
+            sys.exit(1)
 
 
 def generate_formula(version: str, url: str, sha256: str, resources: list[dict]) -> str:
