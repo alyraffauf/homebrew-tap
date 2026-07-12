@@ -1,4 +1,6 @@
 cask "opencode-desktop-linux" do
+  os linux: "linux"
+
   version "1.15.11"
   sha256 "a2805908a6f71a574a4a253301e19395443c8c9318d3a7dcbb67257e7e3f07f0"
 
@@ -27,8 +29,10 @@ cask "opencode-desktop-linux" do
   preflight do
     rpm2cpio = Formula["rpm2cpio"].bin/"rpm2cpio"
     cpio = Formula["cpio"].bin/"cpio"
-    system "sh", "-c", "'#{rpm2cpio}' '#{staged_path}/opencode-desktop-linux-x86_64.rpm' | '#{cpio}' -idm --quiet",
-           chdir: staged_path
+    unless system "sh", "-c", "'#{rpm2cpio}' '#{staged_path}/opencode-desktop-linux-x86_64.rpm' | '#{cpio}' -idm --quiet",
+                   chdir: staged_path
+      raise "opencode-desktop-linux: RPM extraction failed"
+    end
 
     app_dir = "#{staged_path}/opt/OpenCode"
 
@@ -58,8 +62,9 @@ cask "opencode-desktop-linux" do
   end
 
   postflight do
-    apps = "#{Dir.home}/.local/share/applications"
-    icon_dir = "#{Dir.home}/.local/share/icons/hicolor/128x128/apps"
+    xdg_data = ENV.fetch("XDG_DATA_HOME", "#{Dir.home}/.local/share")
+    apps = "#{xdg_data}/applications"
+    icon_dir = "#{xdg_data}/icons/hicolor/128x128/apps"
     FileUtils.mkdir_p apps
     FileUtils.mkdir_p icon_dir
 
@@ -81,8 +86,9 @@ cask "opencode-desktop-linux" do
   end
 
   uninstall_postflight do
-    FileUtils.rm_f "#{Dir.home}/.local/share/applications/opencode-desktop.desktop"
-    FileUtils.rm_f "#{Dir.home}/.local/share/icons/hicolor/128x128/apps/opencode-desktop.png"
+    xdg_data = ENV.fetch("XDG_DATA_HOME", "#{Dir.home}/.local/share")
+    FileUtils.rm_f "#{xdg_data}/applications/opencode-desktop.desktop"
+    FileUtils.rm_f "#{xdg_data}/icons/hicolor/128x128/apps/opencode-desktop.png"
   end
 
   zap trash: [

@@ -21,10 +21,11 @@ cask "visual-studio-code-linux" do
   binary "VSCode-linux-x64/bin/code-tunnel"
   bash_completion "#{staged_path}/VSCode-linux-x64/resources/completions/bash/code"
   zsh_completion  "#{staged_path}/VSCode-linux-x64/resources/completions/zsh/_code"
+  xdg_data = ENV.fetch("XDG_DATA_HOME", "#{Dir.home}/.local/share")
   artifact "VSCode-linux-x64/code.desktop",
-           target: "#{Dir.home}/.local/share/applications/code.desktop"
+           target: "#{xdg_data}/applications/code.desktop"
   artifact "VSCode-linux-x64/code-url-handler.desktop",
-           target: "#{Dir.home}/.local/share/applications/code-url-handler.desktop"
+           target: "#{xdg_data}/applications/code-url-handler.desktop"
 
   preflight do
     # Disable VS Code's built-in update checks; Homebrew manages this install.
@@ -35,7 +36,8 @@ cask "visual-studio-code-linux" do
     product["configurationDefaults"]["update.mode"] = "none"
     File.write(product_json, JSON.pretty_generate(product))
 
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
+    xdg_data = ENV.fetch("XDG_DATA_HOME", "#{Dir.home}/.local/share")
+    FileUtils.mkdir_p "#{xdg_data}/applications"
     File.write("#{staged_path}/VSCode-linux-x64/code.desktop", <<~EOS)
       [Desktop Entry]
       Name=Visual Studio Code

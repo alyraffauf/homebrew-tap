@@ -24,7 +24,7 @@ brew install tg
 
 ## Casks
 
-Linux-only, x86_64 casks, mirrored here from the [Universal Blue](https://github.com/ublue-os) taps.
+Linux-only, x86_64 casks.
 
 | Cask | Description |
 |------|-------------|

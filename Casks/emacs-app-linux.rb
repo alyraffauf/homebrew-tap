@@ -1,4 +1,6 @@
 cask "emacs-app-linux" do
+  os linux: "linux"
+
   version "30.2-18"
   sha256 "2d3d1c145fe8f0edf51f1275c5109eee116f98e2899498ca710ab96858fa0a70"
 
@@ -109,10 +111,11 @@ cask "emacs-app-linux" do
   end
 
   postflight do
+    xdg_data = ENV.fetch("XDG_DATA_HOME", "#{Dir.home}/.local/share")
     # Create necessary directories
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/icons/hicolor"
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/glib-2.0/schemas"
+    FileUtils.mkdir_p "#{xdg_data}/applications"
+    FileUtils.mkdir_p "#{xdg_data}/icons/hicolor"
+    FileUtils.mkdir_p "#{xdg_data}/glib-2.0/schemas"
 
     emacs_root = "#{HOMEBREW_PREFIX}/opt/emacs-app-linux"
 
@@ -120,11 +123,11 @@ cask "emacs-app-linux" do
     if File.exist?("#{emacs_root}/share/glib-2.0/schemas/gschemas.compiled")
       FileUtils.cp(
         "#{emacs_root}/share/glib-2.0/schemas/gschemas.compiled",
-        "#{Dir.home}/.local/share/glib-2.0/schemas/",
+        "#{xdg_data}/glib-2.0/schemas/",
       )
       FileUtils.cp(
         "#{emacs_root}/share/glib-2.0/schemas/org.gnu.emacs.defaults.gschema.xml",
-        "#{Dir.home}/.local/share/glib-2.0/schemas/",
+        "#{xdg_data}/glib-2.0/schemas/",
       )
     end
 
@@ -135,14 +138,14 @@ cask "emacs-app-linux" do
       src_icon = "#{emacs_root}/share/icons/hicolor/#{size}/apps/emacs.svg" if size == "scalable"
 
       if File.exist?(src_icon)
-        FileUtils.mkdir_p "#{Dir.home}/.local/share/icons/hicolor/#{size}/apps"
-        FileUtils.cp(src_icon, "#{Dir.home}/.local/share/icons/hicolor/#{size}/apps/")
+        FileUtils.mkdir_p "#{xdg_data}/icons/hicolor/#{size}/apps"
+        FileUtils.cp(src_icon, "#{xdg_data}/icons/hicolor/#{size}/apps/")
       end
     end
 
     # Update icon cache if available
     if system("which gtk-update-icon-cache > /dev/null 2>&1")
-      system "gtk-update-icon-cache", "#{Dir.home}/.local/share/icons/hicolor", "-f",
+      system "gtk-update-icon-cache", "#{xdg_data}/icons/hicolor", "-f",
              "-t"
     end
 
@@ -174,41 +177,49 @@ cask "emacs-app-linux" do
         desktop_content.gsub!(/^(Categories=.*?)$/i, "StartupWMClass=#{emacs_wm_class}\n\\1")
       end
 
-      File.write("#{Dir.home}/.local/share/applications/#{desktop_name}.desktop", desktop_content)
+      File.write("#{xdg_data}/applications/#{desktop_name}.desktop", desktop_content)
     end
 
     # Update desktop database if available
     if system("which update-desktop-database > /dev/null 2>&1")
       system "update-desktop-database",
-             "#{Dir.home}/.local/share/applications"
+             "#{xdg_data}/applications"
     end
   end
 
   uninstall_postflight do
+    xdg_data = ENV.fetch("XDG_DATA_HOME", "#{Dir.home}/.local/share")
     # Clean up desktop files
     %w[emacs emacsclient emacs-mail emacsclient-mail].each do |desktop_name|
-      FileUtils.rm("#{Dir.home}/.local/share/applications/#{desktop_name}.desktop")
+      FileUtils.rm_f("#{xdg_data}/applications/#{desktop_name}.desktop")
     end
 
     # Clean up icons
     icon_sizes = %w[16x16 24x24 32x32 48x48 128x128 scalable]
     icon_sizes.each do |size|
       icon_ext = (size == "scalable") ? "svg" : "png"
-      FileUtils.rm("#{Dir.home}/.local/share/icons/hicolor/#{size}/apps/emacs.#{icon_ext}")
+      FileUtils.rm_f("#{xdg_data}/icons/hicolor/#{size}/apps/emacs.#{icon_ext}")
     end
 
     # Clean up gschemas
-    FileUtils.rm("#{Dir.home}/.local/share/glib-2.0/schemas/gschemas.compiled")
-    FileUtils.rm("#{Dir.home}/.local/share/glib-2.0/schemas/org.gnu.emacs.defaults.gschema.xml")
+    FileUtils.rm_f("#{xdg_data}/glib-2.0/schemas/gschemas.compiled")
+    FileUtils.rm_f("#{xdg_data}/glib-2.0/schemas/org.gnu.emacs.defaults.gschema.xml")
 
     # Update caches
     if system("which gtk-update-icon-cache > /dev/null 2>&1")
-      system "gtk-update-icon-cache", "#{Dir.home}/.local/share/icons/hicolor", "-f",
+      system "gtk-update-icon-cache", "#{xdg_data}/icons/hicolor", "-f",
              "-t"
     end
     if system("which update-desktop-database > /dev/null 2>&1")
       system "update-desktop-database",
-             "#{Dir.home}/.local/share/applications"
+             "#{xdg_data}/applications"
     end
   end
+
+  zap trash: [
+    "~/.emacs.d",
+    "#{ENV.fetch("XDG_CONFIG_HOME", "#{Dir.home}/.config")}/emacs",
+    "#{ENV.fetch("XDG_DATA_HOME", "#{Dir.home}/.local/share")}/emacs",
+    "#{ENV.fetch("XDG_CACHE_HOME", "#{Dir.home}/.cache")}/emacs",
+  ]
 end

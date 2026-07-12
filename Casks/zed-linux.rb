@@ -1,4 +1,6 @@
 cask "zed-linux" do
+  os linux: "linux"
+
   version "1.7.2"
   sha256 "b9d6987934c2a03833f5f196508f15ab8868d42396dc1a7607186ad70d6e9c02"
 
@@ -33,8 +35,8 @@ cask "zed-linux" do
 
   uninstall_postflight do
     xdg_data = ENV.fetch("XDG_DATA_HOME", "#{Dir.home}/.local/share")
-    FileUtils.rm("#{xdg_data}/applications/dev.zed.Zed.desktop")
-    FileUtils.rm("#{xdg_data}/icons/zed.png")
+    FileUtils.rm_f("#{xdg_data}/applications/dev.zed.Zed.desktop")
+    FileUtils.rm_f("#{xdg_data}/icons/zed.png")
   end
 
   zap trash: [
