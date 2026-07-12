@@ -85,7 +85,7 @@ cask "visual-studio-code-linux" do
   end
 
   zap trash: [
-    "~/.config/Code",
-    "~/.vscode",
+    "#{Dir.home}/.vscode",
+    "#{ENV.fetch("XDG_CONFIG_HOME", "#{Dir.home}/.config")}/Code",
   ]
 end
