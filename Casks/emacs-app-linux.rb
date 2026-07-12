@@ -78,10 +78,11 @@ cask "emacs-app-linux" do
       fi
     PATHS
 
-    content.gsub!(
+    matched = content.gsub!(
       %r{# Add Homebrew paths.*?\n  export LD_LIBRARY_PATH="/home/linuxbrew/\.linuxbrew/lib:\$LD_LIBRARY_PATH"\nfi}m,
       homebrew_paths.strip,
     )
+    raise "emacs-app-linux: could not find Homebrew paths block in run-emacs.sh" if matched.nil?
 
     # Add Emacs data directory environment variables after the GSETTINGS_SCHEMA_DIR line
     emacs_env_vars = <<~ENVVARS
@@ -102,10 +103,11 @@ cask "emacs-app-linux" do
       fi
     ENVVARS
 
-    content.gsub!(
+    matched = content.gsub!(
       'export GSETTINGS_SCHEMA_DIR="$SCRIPT_DIR/share/glib-2.0/schemas"',
       emacs_env_vars.strip,
     )
+    raise "emacs-app-linux: could not find GSETTINGS_SCHEMA_DIR line in run-emacs.sh" if matched.nil?
 
     File.write(script_path, content)
   end
@@ -191,19 +193,19 @@ cask "emacs-app-linux" do
     xdg_data = ENV.fetch("XDG_DATA_HOME", "#{Dir.home}/.local/share")
     # Clean up desktop files
     %w[emacs emacsclient emacs-mail emacsclient-mail].each do |desktop_name|
-      FileUtils.rm_f("#{xdg_data}/applications/#{desktop_name}.desktop")
+      FileUtils.rm("#{xdg_data}/applications/#{desktop_name}.desktop")
     end
 
     # Clean up icons
     icon_sizes = %w[16x16 24x24 32x32 48x48 128x128 scalable]
     icon_sizes.each do |size|
       icon_ext = (size == "scalable") ? "svg" : "png"
-      FileUtils.rm_f("#{xdg_data}/icons/hicolor/#{size}/apps/emacs.#{icon_ext}")
+      FileUtils.rm("#{xdg_data}/icons/hicolor/#{size}/apps/emacs.#{icon_ext}")
     end
 
     # Clean up gschemas
-    FileUtils.rm_f("#{xdg_data}/glib-2.0/schemas/gschemas.compiled")
-    FileUtils.rm_f("#{xdg_data}/glib-2.0/schemas/org.gnu.emacs.defaults.gschema.xml")
+    FileUtils.rm("#{xdg_data}/glib-2.0/schemas/gschemas.compiled")
+    FileUtils.rm("#{xdg_data}/glib-2.0/schemas/org.gnu.emacs.defaults.gschema.xml")
 
     # Update caches
     if system("which gtk-update-icon-cache > /dev/null 2>&1")
@@ -217,9 +219,9 @@ cask "emacs-app-linux" do
   end
 
   zap trash: [
-    "~/.emacs.d",
+    "#{Dir.home}/.emacs.d",
+    "#{ENV.fetch("XDG_CACHE_HOME", "#{Dir.home}/.cache")}/emacs",
     "#{ENV.fetch("XDG_CONFIG_HOME", "#{Dir.home}/.config")}/emacs",
     "#{ENV.fetch("XDG_DATA_HOME", "#{Dir.home}/.local/share")}/emacs",
-    "#{ENV.fetch("XDG_CACHE_HOME", "#{Dir.home}/.cache")}/emacs",
   ]
 end
