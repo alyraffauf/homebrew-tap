@@ -15,6 +15,7 @@ brew tap alyraffauf/tap
 | `atbbs` | AT Protocol bulletin board system |
 | `dewy`  | Minimal terminal UI for Todoist |
 | `tg`    | Command-line client for Tangled, the git forge built on atproto |
+| `obsidian-headless` | Headless client for Obsidian Sync and Publish |
 
 ```
 brew install atbbs
