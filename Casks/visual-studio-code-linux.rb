@@ -1,8 +1,8 @@
 cask "visual-studio-code-linux" do
   os linux: "linux"
 
-  version "1.128.1"
-  sha256 "80fcccecaf838c08ced90942066cea92155ee58277abf23449ae3b2601f201f1"
+  version "1.129.0"
+  sha256 "49a243d36d0ffc38bae5f55b30045c3c58f37c0f27e8d2c124d66a1996aa5b7e"
 
   url "https://update.code.visualstudio.com/#{version}/linux-x64/stable"
   name "Microsoft Visual Studio Code"
