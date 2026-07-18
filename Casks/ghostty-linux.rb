@@ -35,6 +35,7 @@ cask "ghostty-linux" do
     desktop_content.gsub!(/^Exec=.*/, "Exec=#{HOMEBREW_PREFIX}/bin/ghostty")
     desktop_content.gsub!(/^TryExec=.*/, "TryExec=#{HOMEBREW_PREFIX}/bin/ghostty")
     desktop_content.gsub!(/^Icon=.*/, "Icon=ghostty")
+    desktop_content.gsub!(/^DBusActivatable=.*/, "DBusActivatable=false")
     File.write("#{xdg_data}/applications/com.mitchellh.ghostty.desktop", desktop_content)
 
     Dir.glob("#{staged_path}/squashfs-root/share/icons/hicolor/*/apps/com.mitchellh.ghostty.png").each do |icon|
