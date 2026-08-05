@@ -1,8 +1,8 @@
 cask "todoist-linux" do
   os linux: "linux"
 
-  version "9.29.1"
-  sha256 "a5236a6406546fd6f6ff89680c8491649ece6441a8fb264ba9c37773b75e3759"
+  version "9.30.0"
+  sha256 "21ec180a3daee7398d3b1ec1217fdd0c7078ab66db0e5cb23c82ac10aa734c9e"
 
   url "https://electron-dl.todoist.net/linux/Todoist-linux-#{version}-x86_64-latest.AppImage"
   name "Todoist"
