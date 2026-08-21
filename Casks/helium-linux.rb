@@ -1,8 +1,8 @@
 cask "helium-linux" do
   os linux: "linux"
 
-  version "0.15.5.1"
-  sha256 "f34a1ee1a6ab2e3109d92e3939512a37cfe68a2f0d230b525cc1589fc192fd97"
+  version "0.15.6.1"
+  sha256 "4d5ce2e595b2bc5b21ea8be80615390d6d24df0950e7f8140c3e3eca40103d36"
 
   url "https://github.com/imputnet/helium-linux/releases/download/#{version}/helium-#{version}-x86_64_linux.tar.xz",
       verified: "github.com/imputnet/helium-linux/"
