@@ -1,8 +1,8 @@
 class Tg < Formula
   desc "Command-line client for Tangled, the git forge built on atproto"
   homepage "https://github.com/alyraffauf/tg"
-  url "https://github.com/alyraffauf/tg/archive/refs/tags/v0.9.0.tar.gz"
-  sha256 "3c71ffe7f4e9e692a6097089ea8627c21c6eda41f70301e6a14845b3c71b8066"
+  url "https://github.com/alyraffauf/tg/archive/refs/tags/v0.10.0.tar.gz"
+  sha256 "1d8aae68ecb0b29834f5cb265448f139ed736a1c2469b0d2cc0b162d3df9155b"
   license "GPL-3.0-or-later"
 
   depends_on "go" => :build
