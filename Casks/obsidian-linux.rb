@@ -1,8 +1,8 @@
 cask "obsidian-linux" do
   os linux: "linux"
 
-  version "1.13.4"
-  sha256 "b66f01d2a6afbb6b7abd93e4b5c6602645f03c16ad2d6dd49fd5a90dddd87872"
+  version "1.13.7"
+  sha256 "e0d8e0a611624de8c9c7dcd8a9e648279fb0a0d552faa1312b7e4f3a5fa72663"
 
   url "https://github.com/obsidianmd/obsidian-releases/releases/download/v#{version}/Obsidian-#{version}.AppImage",
       verified: "github.com/obsidianmd/"
